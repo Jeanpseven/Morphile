@@ -1,46 +1,57 @@
 import subprocess
-import glob
 
-# Função para instalar as dependências
 def instalar_dependencias():
     subprocess.run(['sudo', 'apt', 'update'])
     subprocess.run(['sudo', 'apt', 'install', 'imagemagick'])
-    subprocess.run(['sudo', 'apt', 'install', 'libreoffice'])
+    
+    try:
+        subprocess.run(['libreoffice', '--version'], check=True)
+    except subprocess.CalledProcessError:
+        print("LibreOffice não encontrado. Instalando...")
+        subprocess.run(['sudo', 'apt', 'install', 'libreoffice'])
+
     subprocess.run(['sudo', 'apt', 'install', 'ffmpeg'])
 
-# Função para converter os arquivos
 def converter(arquivo_entrada, arquivo_saida):
-    # Verificar se as dependências estão instaladas
-    try:
-        subprocess.run(['convert', '--version'], check=True)
-        subprocess.run(['libreoffice', '--version'], check=True)
-        subprocess.run(['ffmpeg', '-version'], check=True)
-    except subprocess.CalledProcessError:
-        print("Instalando dependências...")
-        instalar_dependencias()
+    extensao_entrada = arquivo_entrada.split('.')[-1].lower()
+    extensao_saida = arquivo_saida.split('.')[-1].lower()
 
-    # Expandir curingas no arquivo de entrada
-    arquivos_encontrados = glob.glob(arquivo_entrada)
+    if extensao_entrada == 'pdf':
+        subprocess.run(['convert', '-density', '300', arquivo_entrada, '-quality', '100', arquivo_saida])
+        print(f"Conversão de PDF para imagem concluída: {arquivo_saida}")
 
-    # Verificar se há arquivos encontrados
-    if not arquivos_encontrados:
-        print("Nenhum arquivo encontrado. Saindo.")
-        return
+    elif extensao_entrada in ('docx', 'doc'):
+        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', f"{arquivo_saida.split('/')[0]}", arquivo_entrada])
+        print(f"Conversão de DOCX/DOC para PDF concluída: {arquivo_saida}")
 
-    # Loop sobre os arquivos encontrados
-    for arquivo in arquivos_encontrados:
-        extensao_entrada = arquivo.split('.')[-1].lower()
+    elif extensao_entrada == 'mp3':
+        subprocess.run(['ffmpeg', '-i', arquivo_entrada, arquivo_saida])
+        print(f"Conversão de MP3 para WAV concluída: {arquivo_saida}")
 
-        if extensao_entrada == 'pdf':
-            subprocess.run(['convert', '-density', '300', arquivo, '-quality', '100', arquivo_saida])
-            print(f"Conversão de PDF para imagem concluída para {arquivo}!")
+    elif extensao_entrada in ('mp4', 'avi'):
+        subprocess.run(['ffmpeg', '-i', arquivo_entrada, '-vf', 'fps=10,scale=320:-1:flags=lanczos', '-c:v', 'gif', arquivo_saida])
+        print(f"Conversão de MP4/AVI para GIF concluída: {arquivo_saida}")
 
-        # Adicione mais casos conforme necessário
-        else:
-            print(f"Tipo de arquivo não suportado para {arquivo}. Ignorando.")
+    elif extensao_entrada in ('jpg', 'jpeg', 'png', 'gif'):
+        subprocess.run(['convert', arquivo_entrada, arquivo_saida])
+        print(f"Conversão de imagem para PDF concluída: {arquivo_saida}")
+
+    elif extensao_entrada == 'txt':
+        subprocess.run(['cp', arquivo_entrada, arquivo_saida])
+        print(f"Cópia do arquivo de texto concluída: {arquivo_saida}")
+
+    elif extensao_entrada == 'flac':
+        subprocess.run(['ffmpeg', '-i', arquivo_entrada, arquivo_saida])
+        print(f"Conversão de FLAC concluída: {arquivo_saida}")
+
+    # Adicione mais casos para outros tipos de arquivo conforme necessário
+
+    else:
+        print("Tipo de arquivo não suportado. Saindo.")
 
 # Exemplo de uso
-arquivo_entrada = input("Digite o padrão do nome do arquivo de entrada (com extensão): ")
+instalar_dependencias()
+arquivo_entrada = input("Digite o nome do arquivo de entrada (com extensão): ")
 arquivo_saida = input("Digite o nome do arquivo de saída (com extensão): ")
 
 converter(arquivo_entrada, arquivo_saida)
