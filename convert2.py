@@ -3,14 +3,8 @@ import subprocess
 def instalar_dependencias():
     subprocess.run(['sudo', 'apt', 'update'])
     subprocess.run(['sudo', 'apt', 'install', 'imagemagick'])
-    
-    try:
-        subprocess.run(['libreoffice', '--version'], check=True)
-    except subprocess.CalledProcessError:
-        print("LibreOffice não encontrado. Instalando...")
-        subprocess.run(['sudo', 'apt', 'install', 'libreoffice'])
-
     subprocess.run(['sudo', 'apt', 'install', 'ffmpeg'])
+    subprocess.run(['sudo', 'apt', 'install', 'pandoc'])
 
 def converter(arquivo_entrada, arquivo_saida):
     extensao_entrada = arquivo_entrada.split('.')[-1].lower()
@@ -21,7 +15,7 @@ def converter(arquivo_entrada, arquivo_saida):
         print(f"Conversão de PDF para imagem concluída: {arquivo_saida}")
 
     elif extensao_entrada in ('docx', 'doc'):
-        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', f"{arquivo_saida.split('/')[0]}", arquivo_entrada])
+        subprocess.run(['pandoc', arquivo_entrada, '-o', arquivo_saida])
         print(f"Conversão de DOCX/DOC para PDF concluída: {arquivo_saida}")
 
     elif extensao_entrada == 'mp3':
