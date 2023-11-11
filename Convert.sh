@@ -1,3 +1,12 @@
+#!/bin/bash
+
+echo "Bem-vindo ao Script de Conversão!"
+read -p "Digite o nome do arquivo de entrada (com extensão): " arquivo_entrada
+read -p "Digite o nome do arquivo de saída (com extensão): " arquivo_saida
+
+extensao_entrada=$(echo "$arquivo_entrada" | awk -F'.' '{print tolower($NF)}')
+extensao_saida=$(echo "$arquivo_saida" | awk -F'.' '{print tolower($NF)}')
+
 case "$extensao_entrada" in
     pdf)
         convert -density 300 "$arquivo_entrada" -quality 100 "$arquivo_saida"
@@ -23,10 +32,6 @@ case "$extensao_entrada" in
         cp "$arquivo_entrada" "$arquivo_saida"
         echo "Cópia do arquivo de texto concluída!"
         ;;
-    flac)
-        ffmpeg -i "$arquivo_entrada" -c:a mp3 "$arquivo_saida"
-        echo "Conversão de FLAC para MP3 concluída!"
-        ;;
     folder)
         read -p "Digite o caminho da pasta contendo imagens: " pasta_entrada
         read -p "Digite a duração de cada imagem em segundos: " duracao
@@ -44,6 +49,10 @@ case "$extensao_entrada" in
 
         ffmpeg -framerate 1/"$duracao" -pattern_type glob -i "$pasta_entrada/*.png" -c:v libx264 -r 30 "$arquivo_saida"
         echo "Conversão de imagens para vídeo concluída!"
+        ;;
+    flac)
+        ffmpeg -i "$arquivo_entrada" "$arquivo_saida"
+        echo "Conversão de FLAC concluída!"
         ;;
     *)
         echo "Tipo de arquivo não suportado. Saindo."
