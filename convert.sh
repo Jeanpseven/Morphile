@@ -2,10 +2,16 @@
 
 echo "Bem-vindo ao Script de Conversão!"
 read -p "Digite o caminho completo do arquivo de entrada: " caminho_entrada
-read -p "Digite o caminho completo do arquivo de saída (com extensão): " caminho_saida
+read -p "Digite o caminho completo ou apenas o nome com extensão do arquivo de saída: " caminho_saida
 
+# Extrai o tipo de entrada e saída
 tipo_entrada="${caminho_entrada##*.}"
 tipo_saida="${caminho_saida##*.}"
+
+# Se o caminho de saída não contiver '/', então adiciona o diretório atual
+if [[ ! "$caminho_saida" =~ '/' ]]; then
+    caminho_saida="./$caminho_saida"
+fi
 
 case "$tipo_entrada" in
     pdf)
@@ -25,15 +31,19 @@ case "$tipo_entrada" in
         echo "Conversão de MP4/AVI para GIF concluída!"
         ;;
     jpg|jpeg|png|gif)
+        # Adiciona a extensão correta na saída, caso não tenha sido fornecida
+        if [[ ! "$caminho_saida" =~ \. ]]; then
+            caminho_saida="$caminho_saida.jpg"
+        fi
         convert "$caminho_entrada" "$caminho_saida"
-        echo "Conversão de imagem para PDF concluída!"
+        echo "Conversão de imagem para JPG concluída!"
         ;;
     txt)
         cp "$caminho_entrada" "$caminho_saida"
         echo "Cópia do arquivo de texto concluída!"
         ;;
     flac)
-        ffmpeg -i "$caminho_entrada" -f flac "$caminho_saida"
+        ffmpeg -i "$caminho_entrada" -c:a flac "$caminho_saida"
         echo "Conversão para FLAC concluída!"
         ;;
     folder)
