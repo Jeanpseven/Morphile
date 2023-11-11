@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Ajuste de permissões temporárias
+POLICY="PDF"
+MAGICK_CONFIGURE_PATH="/etc/ImageMagick-6/policy.xml"
+sed -i "s/$POLICY none/$POLICY read|write/g" $MAGICK_CONFIGURE_PATH
+
+# Função para converter os arquivos
 converter() {
     arquivo_entrada=$1
     arquivo_saida=$2
@@ -12,30 +18,12 @@ converter() {
             convert -density 300 "$arquivo_entrada" -quality 100 "$arquivo_saida"
             echo "Conversão de PDF para imagem concluída!"
             ;;
-        docx|doc)
-            libreoffice --headless --convert-to pdf --outdir $(dirname "$arquivo_saida") "$arquivo_entrada"
-            echo "Conversão de DOCX/DOC para PDF concluída!"
-            ;;
-        mp3)
-            ffmpeg -i "$arquivo_entrada" "$arquivo_saida"
-            echo "Conversão de MP3 para WAV concluída!"
-            ;;
-        mp4|avi)
-            ffmpeg -i "$arquivo_entrada" -vf "fps=10,scale=320:-1:flags=lanczos" -c:v gif "$arquivo_saida"
-            echo "Conversão de MP4/AVI para GIF concluída!"
-            ;;
         jpg|jpeg|png|gif)
             convert "$arquivo_entrada" "$arquivo_saida"
-            echo "Conversão de imagem concluída!"
+            echo "Conversão de imagem para JPG concluída!"
             ;;
-        txt)
-            cp "$arquivo_entrada" "$arquivo_saida"
-            echo "Cópia do arquivo de texto concluída!"
-            ;;
-        flac)
-            ffmpeg -i "$arquivo_entrada" "$arquivo_saida"
-            echo "Conversão de FLAC concluída!"
-            ;;
+        # Adicione mais casos conforme necessário
+
         *)
             echo "Tipo de arquivo não suportado. Saindo."
             exit 1
@@ -48,3 +36,6 @@ read -p "Digite o nome do arquivo de entrada (com extensão): " arquivo_entrada
 read -p "Digite o nome do arquivo de saída (com extensão): " arquivo_saida
 
 converter "$arquivo_entrada" "$arquivo_saida"
+
+# Ajuste de permissões de volta ao normal
+sed -i "s/$POLICY read|write/$POLICY none/g" $MAGICK_CONFIGURE_PATH
