@@ -1,15 +1,21 @@
 #!/bin/bash
 
 echo "Bem-vindo ao Script de Conversão!"
-read -p "Digite o caminho do arquivo de entrada: " input_path
-read -p "Digite o caminho do arquivo de saída: " output_path
+read -p "Digite o caminho do arquivo de entrada (com extensão): " input_path
+read -p "Digite o caminho do arquivo de saída (com extensão ou nome se for salvar no repo local): " output_path
 
-# Remover as aspas simples dos caminhos, se presentes
-input_path="${input_path/'/'/}"
-output_path="${output_path/'/'/}"
+# Remover aspas, se presentes
+input_path="${input_path//\"/}"
+input_path="${input_path//\'/}"
+output_path="${output_path//\"/}"
+output_path="${output_path//\'/}"
 
-filename=$(basename -- "$input_path")
-extension="${filename##*.}"
+# Verificar se a saída é um diretório
+if [ -d "$output_path" ]; then
+    output_path="$output_path/$(basename "$input_path")"
+fi
+
+extension="${input_path##*.}"
 
 case "$extension" in
     pdf)
@@ -30,15 +36,33 @@ case "$extension" in
         ;;
     jpg|jpeg|png|gif)
         convert "$input_path" "$output_path"
-        echo "Conversão de imagem para JPG concluída!"
+        echo "Conversão de imagem para PDF concluída!"
         ;;
     txt)
         cp "$input_path" "$output_path"
         echo "Cópia do arquivo de texto concluída!"
         ;;
     flac)
-        # Lógica específica para conversão de FLAC
-        # Adicione sua lógica aqui
+        ffmpeg -i "$input_path" -c:a flac "$output_path"
+        echo "Conversão de FLAC concluída!"
+        ;;
+    folder)
+        read -p "Digite o caminho da pasta contendo imagens: " folder_path
+        read -p "Digite a duração de cada imagem em segundos: " duration
+        read -p "Digite o caminho completo do arquivo de saída (com extensão): " output_path_folder
+
+        if [ ! -d "$folder_path" ]; then
+            echo "Erro: Pasta de entrada não encontrada."
+            exit 1
+        fi
+
+        if [ -z "$output_path_folder" ]; then
+            echo "Erro: Caminho de saída inválido."
+            exit 1
+        fi
+
+        ffmpeg -framerate 1/"$duration" -pattern_type glob -i "$folder_path/*.png" -c:v libx264 -r 30 "$output_path_folder"
+        echo "Conversão de imagens para vídeo concluída!"
         ;;
     *)
         echo "Tipo de arquivo não suportado. Saindo."
