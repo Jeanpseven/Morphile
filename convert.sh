@@ -13,13 +13,22 @@ if [[ ! "$caminho_saida" =~ '/' ]]; then
     caminho_saida="./$caminho_saida"
 fi
 
+# Verifica se o arquivo de entrada existe
+if [ ! -f "$caminho_entrada" ]; then
+    echo "Erro: Arquivo de entrada não encontrado."
+    exit 1
+fi
+
+# Criação do diretório de saída se não existir
+mkdir -p "$(dirname "$caminho_saida")"
+
 case "$tipo_entrada" in
     pdf)
         convert -density 300 "$caminho_entrada" -quality 100 "$caminho_saida"
         echo "Conversão de PDF para imagem concluída!"
         ;;
     docx|doc)
-        libreoffice --headless --convert-to pdf --outdir $(dirname "$caminho_saida") "$caminho_entrada"
+        libreoffice --headless --convert-to pdf --outdir "$(dirname "$caminho_saida")" "$caminho_entrada"
         echo "Conversão de DOCX/DOC para PDF concluída!"
         ;;
     mp3)
