@@ -38,14 +38,14 @@ case "$extensao_entrada" in
     folder)
         read -p "Digite o caminho da pasta contendo imagens: " pasta_entrada
         read -p "Digite a duração de cada imagem em segundos: " duracao
-        read -p "Digite o caminho completo do arquivo de saída (com extensão): " arquivo_saida
+        read -p "Digite o caminho completo do arquivo de saída (com extensão): " caminho_saida
 
         if [ ! -d "$pasta_entrada" ]; then
             echo "Erro: Pasta de entrada não encontrada."
             exit 1
         fi
 
-        if [ -z "$arquivo_saida" ]; then
+        if [ -z "$caminho_saida" ]; then
             echo "Erro: Caminho de saída inválido."
             exit 1
         fi
@@ -53,12 +53,11 @@ case "$extensao_entrada" in
         ffmpeg -framerate 1/"$duracao" -pattern_type glob -i "$pasta_entrada/*.png" -c:v libx264 -r 30 "$caminho_saida"
         echo "Conversão de imagens para vídeo concluída!"
         ;;
-    flac)
-        ffmpeg -i "$caminho_entrada" "$caminho_saida"
-        echo "Conversão de FLAC concluída!"
-        ;;
     *)
-        echo "Tipo de arquivo não suportado. Saindo."
-        exit 1
         ;;
 esac
+
+if [ "$extensao_saida" == "flac" ]; then
+    ffmpeg -i "$caminho_entrada" "$caminho_saida"
+    echo "Conversão de FLAC concluída!"
+fi
