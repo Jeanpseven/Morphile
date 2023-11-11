@@ -1,20 +1,23 @@
 import subprocess
-import os
+
+def instalar_imagemagick():
+    try:
+        subprocess.run(['convert', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+    except FileNotFoundError:
+        subprocess.run(['sudo', 'apt-get', 'install', 'imagemagick'])
 
 def converter(arquivo_entrada, arquivo_saida):
     extensao_entrada = arquivo_entrada.split('.')[-1].lower()
     extensao_saida = arquivo_saida.split('.')[-1].lower()
 
-    if not os.path.isabs(arquivo_entrada):
-        script_path = os.path.dirname(os.path.abspath(__file__))
-        arquivo_entrada = os.path.join(script_path, arquivo_entrada)
+    instalar_imagemagick()  # Verifica e instala o ImageMagick se necessário
 
     if extensao_entrada == 'pdf':
         subprocess.run(['convert', '-density', '300', arquivo_entrada, '-quality', '100', arquivo_saida])
         print("Conversão de PDF para imagem concluída!")
 
     elif extensao_entrada in ('docx', 'doc'):
-        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', f"{os.path.dirname(arquivo_saida)}", arquivo_entrada])
+        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', f"{arquivo_saida.split('/')[0]}", arquivo_entrada])
         print("Conversão de DOCX/DOC para PDF concluída!")
 
     elif extensao_entrada == 'mp3':
