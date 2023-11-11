@@ -1,8 +1,8 @@
 import subprocess
 
 def converter(arquivo_entrada, arquivo_saida):
-    extensao_entrada = arquivo_entrada.split('.')[-1]
-    extensao_saida = arquivo_saida.split('.')[-1]
+    extensao_entrada = arquivo_entrada.split('.')[-1].lower()
+    extensao_saida = arquivo_saida.split('.')[-1].lower()
 
     if extensao_entrada == 'pdf':
         subprocess.run(['convert', '-density', '300', arquivo_entrada, '-quality', '100', arquivo_saida])
@@ -20,9 +20,17 @@ def converter(arquivo_entrada, arquivo_saida):
         subprocess.run(['ffmpeg', '-i', arquivo_entrada, '-vf', 'fps=10,scale=320:-1:flags=lanczos', '-c:v', 'gif', arquivo_saida])
         print("Conversão de MP4/AVI para GIF concluída!")
 
-    elif extensao_entrada.lower() in ('jpg', 'jpeg', 'png', 'gif'):
+    elif extensao_entrada in ('jpg', 'jpeg', 'png', 'gif'):
         subprocess.run(['convert', arquivo_entrada, arquivo_saida])
         print("Conversão de imagem para PDF concluída!")
+
+    elif extensao_entrada == 'txt':
+        subprocess.run(['cp', arquivo_entrada, arquivo_saida])
+        print("Cópia do arquivo de texto concluída!")
+
+    elif extensao_entrada == 'flac':
+        subprocess.run(['ffmpeg', '-i', arquivo_entrada, arquivo_saida])
+        print("Conversão de FLAC concluída!")
 
     # Adicione mais casos para outros tipos de arquivo conforme necessário
 
