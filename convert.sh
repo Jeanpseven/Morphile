@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# Ajuste de permissões temporárias
-POLICY="PDF"
+# Configuração automática das permissões
 MAGICK_CONFIGURE_PATH="/etc/ImageMagick-6/policy.xml"
-sed -i "s/$POLICY none/$POLICY read|write/g" $MAGICK_CONFIGURE_PATH
+sed -i "s/<policymap>/$POLICY <policymap>/g" $MAGICK_CONFIGURE_PATH
 
 # Função para converter os arquivos
 converter() {
@@ -25,7 +24,7 @@ converter() {
         # Adicione mais casos conforme necessário
 
         *)
-            echo "Tipo de arquivo não suportado. Saindo."
+            echo "Tipo de arquivo não suportado: $extensao_entrada. Saindo."
             exit 1
             ;;
     esac
@@ -37,5 +36,5 @@ read -p "Digite o nome do arquivo de saída (com extensão): " arquivo_saida
 
 converter "$arquivo_entrada" "$arquivo_saida"
 
-# Ajuste de permissões de volta ao normal
-sed -i "s/$POLICY read|write/$POLICY none/g" $MAGICK_CONFIGURE_PATH
+# Restauração das permissões originais
+sed -i "s/$POLICY <policymap>/<policymap>/g" $MAGICK_CONFIGURE_PATH
