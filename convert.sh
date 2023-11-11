@@ -1,49 +1,13 @@
 #!/bin/bash
 
 echo "Bem-vindo ao Script de Conversão!"
-read -p "Digite o caminho completo do arquivo de entrada (com extensão): " caminho_entrada
+read -p "Digite o caminho completo do arquivo de entrada: " caminho_entrada
+read -p "Digite o caminho completo do arquivo de saída (com extensão): " caminho_saida
 
-arquivo_entrada=$(basename "$caminho_entrada")
-extensao_entrada=$(echo "$arquivo_entrada" | awk -F'.' '{print tolower($NF)}')
+tipo_entrada="${caminho_entrada##*.}"
+tipo_saida="${caminho_saida##*.}"
 
-echo "Escolha o tipo de arquivo de saída:"
-
-select tipo_saida in "JPG" "PNG" "GIF" "TXT" "FLAC" "Cancelar"; do
-    case $tipo_saida in
-        "JPG")
-            extensao_saida="jpg"
-            break
-            ;;
-        "PNG")
-            extensao_saida="png"
-            break
-            ;;
-        "GIF")
-            extensao_saida="gif"
-            break
-            ;;
-        "TXT")
-            extensao_saida="txt"
-            break
-            ;;
-        "FLAC")
-            extensao_saida="flac"
-            break
-            ;;
-        "Cancelar")
-            echo "Operação cancelada. Saindo."
-            exit 1
-            ;;
-        *)
-            echo "Opção inválida. Escolha novamente."
-            ;;
-    esac
-done
-
-read -p "Digite o nome do arquivo de saída: " nome_saida
-caminho_saida=$(dirname "$caminho_entrada")/"$nome_saida.$extensao_saida"
-
-case "$extensao_entrada" in
+case "$tipo_entrada" in
     pdf)
         convert -density 300 "$caminho_entrada" -quality 100 "$caminho_saida"
         echo "Conversão de PDF para imagem concluída!"
@@ -68,6 +32,10 @@ case "$extensao_entrada" in
         cp "$caminho_entrada" "$caminho_saida"
         echo "Cópia do arquivo de texto concluída!"
         ;;
+    flac)
+        ffmpeg -i "$caminho_entrada" -f flac "$caminho_saida"
+        echo "Conversão para FLAC concluída!"
+        ;;
     folder)
         read -p "Digite o caminho da pasta contendo imagens: " pasta_entrada
         read -p "Digite a duração de cada imagem em segundos: " duracao
@@ -78,16 +46,13 @@ case "$extensao_entrada" in
             exit 1
         fi
 
-        if [ -z "$caminho_saida" ]; then
+        if [ -z "$arquivo_saida" ]; then
             echo "Erro: Caminho de saída inválido."
             exit 1
         fi
 
-        ffmpeg -framerate 1/"$duracao" -pattern_type glob -i "$pasta_entrada/*.png" -c:v libx264 -r 30 "$caminho_saida"
+        ffmpeg -framerate 1/"$duracao" -pattern_type glob -i "$pasta_entrada/*.png" -c:v libx264 -r 30 "$arquivo_saida"
         echo "Conversão de imagens para vídeo concluída!"
-        ;;
-    flac)
-        # Lógica para a conversão para FLAC
         ;;
     *)
         echo "Tipo de arquivo não suportado. Saindo."
