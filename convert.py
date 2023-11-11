@@ -8,6 +8,22 @@ def converter(arquivo_entrada, arquivo_saida):
         subprocess.run(['convert', '-density', '300', arquivo_entrada, '-quality', '100', arquivo_saida])
         print("Conversão de PDF para imagem concluída!")
 
+    elif extensao_entrada in ('docx', 'doc'):
+        subprocess.run(['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', f"{arquivo_saida.split('/')[0]}", arquivo_entrada])
+        print("Conversão de DOCX/DOC para PDF concluída!")
+
+    elif extensao_entrada == 'mp3':
+        subprocess.run(['ffmpeg', '-i', arquivo_entrada, arquivo_saida])
+        print("Conversão de MP3 para WAV concluída!")
+
+    elif extensao_entrada in ('mp4', 'avi'):
+        subprocess.run(['ffmpeg', '-i', arquivo_entrada, '-vf', 'fps=10,scale=320:-1:flags=lanczos', '-c:v', 'gif', arquivo_saida])
+        print("Conversão de MP4/AVI para GIF concluída!")
+
+    elif extensao_entrada.lower() in ('jpg', 'jpeg', 'png', 'gif'):
+        subprocess.run(['convert', arquivo_entrada, arquivo_saida])
+        print("Conversão de imagem para PDF concluída!")
+
     # Adicione mais casos para outros tipos de arquivo conforme necessário
 
     else:
