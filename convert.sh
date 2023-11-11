@@ -53,11 +53,12 @@ case "$extensao_entrada" in
         ffmpeg -framerate 1/"$duracao" -pattern_type glob -i "$pasta_entrada/*.png" -c:v libx264 -r 30 "$caminho_saida"
         echo "Conversão de imagens para vídeo concluída!"
         ;;
+    flac)
+        ffmpeg -i "$caminho_entrada" "$caminho_saida"
+        echo "Conversão de FLAC concluída!"
+        ;;
     *)
+        echo "Tipo de arquivo não suportado. Saindo."
+        exit 1
         ;;
 esac
-
-if [ "$extensao_saida" == "flac" ]; then
-    ffmpeg -i "$caminho_entrada" "$caminho_saida"
-    echo "Conversão de FLAC concluída!"
-fi
