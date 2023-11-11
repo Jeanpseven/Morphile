@@ -27,9 +27,13 @@ case "$extensao_entrada" in
         ffmpeg -i "$caminho_entrada" -vf "fps=10,scale=320:-1:flags=lanczos" -c:v gif "$caminho_saida"
         echo "Conversão de MP4/AVI para GIF concluída!"
         ;;
-    jpg|jpeg|png|gif)
+    jpg|jpeg)
         convert "$caminho_entrada" "$caminho_saida"
-        echo "Conversão de imagem para PDF concluída!"
+        echo "Conversão de imagem para JPG concluída!"
+        ;;
+    png|gif)
+        convert "$caminho_entrada" "$caminho_saida"
+        echo "Conversão de imagem para PNG/GIF concluída!"
         ;;
     txt)
         cp "$caminho_entrada" "$caminho_saida"
